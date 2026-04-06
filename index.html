@@ -108,43 +108,48 @@
     <section id="testimonios" class="testimonials">
         <div class="container">
             <div class="section-title reveal">
-                <h2>Lo que Dicen <span>Nuestros Clientes</span></h2>
+                <h2>Lo que dicen <span>nuestros Clientes</span></h2>
                 <div class="divider"></div>
             </div>
             <div class="testimonial-carousel reveal">
                 <div class="testimonial-card">
-                    <p>"Excelente servicio. Consulcont ha sido fundamental para la expansión de mi empresa. Su nivel de
-                        detalle es impresionante."</p>
+                    <p>"Excelente servicio de gestión tributaria. Destaco especialmente su profesionalismo y la rapidez
+                        con la que resolvieron mis dudas. Gracias a la asesoría de Consulcont, ahora tengo una
+                        estructura fiscal mucho más clara y eficiente. ¡Totalmente recomendados!"</p>
                     <div class="author">
-                        <img src="https://ui-avatars.com/api/?name=Ricardo+Mendez&background=c4a75d&color=0d1b2a"
-                            alt="Ricardo Mendez">
+                        <img src="https://ui-avatars.com/api/?name=Alejandra+Gaviria&background=c4a75d&color=0d1b2a"
+                            alt="Alejandra Gaviria">
                         <div class="author-info">
-                            <h4>Ricardo Méndez</h4>
-                            <span>CEO, Tech Solutions</span>
+                            <h4>Alejandra Gaviria</h4>
+                            <span>Sky Jewelry</span>
                         </div>
                     </div>
                 </div>
                 <div class="testimonial-card">
-                    <p>"La tranquilidad que nos dan en el manejo de impuestos no tiene precio. Recomendados totalmente
-                        por su profesionalismo."</p>
+                    <p>"Queremos expresar nuestro agradecimiento al equipo de nómina de Consulcont por su impecable
+                        gestión y puntualidad. Es una tranquilidad contar con un proceso tan organizado que garantiza
+                        que cada pago llegue a tiempo y sin errores. Son un aliado estratégico indispensable."</p>
                     <div class="author">
-                        <img src="https://ui-avatars.com/api/?name=Elena+Gomez&background=c4a75d&color=0d1b2a"
-                            alt="Elena Gomez">
+                        <img src="https://ui-avatars.com/api/?name=Julian+Sanchez&background=c4a75d&color=0d1b2a"
+                            alt="Julián Sánchez">
                         <div class="author-info">
-                            <h4>Elena Gómez</h4>
-                            <span>Directora, Global Trade</span>
+                            <h4>Julián Sánchez</h4>
+                            <span>Nexus Tech</span>
                         </div>
                     </div>
                 </div>
                 <div class="testimonial-card">
-                    <p>"Llevamos 3 años con ellos y la nómina nunca ha tenido un error. Son un aliado estratégico
-                        indispensable."</p>
+                    <p>"El outsourcing contable que nos ofrece Consulcont ha sido una inversión estratégica excepcional,
+                        transformando nuestra gestión financiera al reducir costos operativos y eliminar errores en los
+                        procesos. Gracias a su equipo de expertos, garantizamos cumplimiento tributario actualizado,
+                        permitiéndonos concentrarnos en el crecimiento del negocio con reportes financieros precisos y
+                        oportunos."</p>
                     <div class="author">
-                        <img src="https://ui-avatars.com/api/?name=Javier+Ruiz&background=c4a75d&color=0d1b2a"
-                            alt="Javier Ruiz">
+                        <img src="https://ui-avatars.com/api/?name=Andres+Herrera&background=c4a75d&color=0d1b2a"
+                            alt="Andrés Herrera">
                         <div class="author-info">
-                            <h4>Javier Ruiz</h4>
-                            <span>Socio, Constructora R&H</span>
+                            <h4>Andrés Herrera</h4>
+                            <span>Oikos</span>
                         </div>
                     </div>
                 </div>
@@ -229,7 +234,16 @@
             <div class="comment-box reveal">
 
                 <form id="comment-form">
-
+                    <!-- Inputs de nombre y email obligatorios para identificar la persona que hizo el comentario -->
+                    <div class="form-group">
+                        <input type="text" id="opinion-nombre" placeholder="Tu Nombre *" maxlength="60" required>
+                    </div>
+                    <br>
+                    <div class="form-group">
+                        <input type="email" id="opinion-email" placeholder="Tu Correo Electrónico *" maxlength="80"
+                            required>
+                    </div>
+                    <br>
                     <div class="rating-box">
 
                         <label>Calificación *</label>
@@ -267,6 +281,19 @@
 
             </div>
 
+            <!-- Lista de opiniones publicadas -->
+            <div id="opiniones-lista" class="reveal">
+                <div class="opiniones-header">
+                    <h3>Opiniones de <span>nuestros Clientes</span></h3>
+                    <div class="divider"></div>
+                </div>
+                <div class="opiniones-grid" id="opiniones-grid">
+                    <div class="opiniones-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Cargando opiniones...</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

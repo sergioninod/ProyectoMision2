@@ -108,7 +108,7 @@ nav .container {
   gap: 40px;
   transition: right 0.5s ease;
   z-index: 1000;
-  box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
 }
 
 .nav-links.active {
@@ -493,7 +493,7 @@ footer {
   .testimonial-carousel {
     justify-content: flex-start;
   }
-  
+
   .section-title h2 {
     font-size: 2.2rem;
   }
@@ -503,19 +503,24 @@ footer {
   section {
     padding: 60px 0;
   }
+
   .hero h1 {
     font-size: 2rem;
   }
+
   .service-card {
     padding: 25px;
   }
+
   .testimonial-card {
     flex: 0 0 280px;
     padding: 25px;
   }
+
   .contact-info h3 {
     font-size: 2rem;
   }
+
   .services-grid {
     grid-template-columns: 1fr;
   }
@@ -535,7 +540,7 @@ footer {
   justify-content: center;
   align-items: center;
   font-size: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   z-index: 999;
   opacity: 0;
   visibility: hidden;
@@ -617,4 +622,168 @@ footer {
   outline: none;
   border-color: var(--secondary-color);
   background: rgba(255, 255, 255, 0.1);
+}
+
+#comment-form button[type="submit"] {
+  margin-top: 20px;
+  width: 100%;
+}
+
+#opiniones-lista {
+  margin-top: 70px;
+}
+
+.opiniones-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.opiniones-header h3 {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+
+.opiniones-header h3 span {
+  color: var(--secondary-color);
+}
+
+.opiniones-header .divider {
+  width: 60px;
+  height: 3px;
+  background: var(--secondary-color);
+  margin: 0 auto;
+}
+
+/* Grid de cards */
+.opiniones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 24px;
+}
+
+/* Card individual */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.opinion-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 26px 28px;
+  backdrop-filter: blur(10px);
+  transition: var(--transition);
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opinion-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--secondary-color);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 30px rgba(196, 167, 93, 0.1);
+}
+
+/* Estrellas dentro de la card */
+.opinion-stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.opinion-stars i {
+  font-size: 1rem;
+  color: #3a3a3a;
+  transition: var(--transition);
+}
+
+.opinion-stars i.filled {
+  color: var(--secondary-color);
+}
+
+.opinion-rating-num {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-left: 6px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Texto del comentario */
+.opinion-text {
+  font-style: italic;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  flex: 1;
+}
+
+/* Fecha */
+.opinion-date {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.opinion-date i {
+  color: var(--secondary-color);
+  font-size: 0.7rem;
+}
+
+/* Estado vacío / error */
+.opiniones-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 40px 20px;
+  font-size: 0.95rem;
+}
+
+/* Estado de carga */
+.opiniones-loading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  padding: 40px 20px;
+  font-size: 0.9rem;
+}
+
+.opiniones-loading .fa-spinner {
+  color: var(--secondary-color);
+  font-size: 1.1rem;
+}
+
+/* Responsive opiniones */
+@media (max-width: 768px) {
+  .opiniones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .opiniones-header h3 {
+    font-size: 1.8rem;
+  }
+
+  .comment-box {
+    padding: 28px 20px;
+  }
 }

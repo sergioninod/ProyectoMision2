@@ -46,7 +46,7 @@ if (mobileMenu && navLinks) {
         navLinks.classList.toggle('active');
         // Toggle icon between bars and times (X)
         const icon = mobileMenu.querySelector('i');
-        if(icon.classList.contains('fa-bars')) {
+        if (icon.classList.contains('fa-bars')) {
             icon.classList.remove('fa-bars');
             icon.classList.add('fa-times');
         } else {
@@ -137,6 +137,86 @@ if (contactForm) {
 
 // COMENTARIOS CON SUPABASE
 
+/**
+ * Renderiza las estrellas según la calificación (1-5).
+ * @param {number} calificacion
+ * @returns {string} HTML de íconos de estrellas
+ */
+function renderEstrellas(calificacion) {
+    return Array.from({ length: 5 }, (_, i) =>
+        `<i class="fas fa-star${i < calificacion ? ' filled' : ''}"></i>`
+    ).join('');
+}
+
+/**
+ * Formatea una fecha ISO a texto legible en español.
+ * @param {string} isoString
+ * @returns {string}
+ */
+function formatearFecha(isoString) {
+    if (!isoString) return '';
+    return new Date(isoString).toLocaleDateString('es-CO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+/**
+ * Carga todas las opiniones de Supabase y las pinta en el grid.
+ */
+async function cargarComentarios() {
+    const grid = document.getElementById('opiniones-grid');
+    if (!grid || typeof supabaseClient === 'undefined') return;
+
+    // Estado de carga
+    grid.innerHTML = `
+        <div class="opiniones-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Cargando opiniones...</span>
+        </div>`;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('comentario')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            grid.innerHTML = `
+                <p class="opiniones-empty">
+                    <i class="fas fa-comment-slash" style="color: var(--secondary-color); margin-right: 8px;"></i>
+                    Aún no hay opiniones. ¡Sé el primero en compartir la tuya!
+                </p>`;
+            return;
+        }
+
+        grid.innerHTML = data.map((op, i) => `
+            <div class="opinion-card" style="animation-delay: ${i * 0.07}s">
+                <div class="opinion-stars">
+                    ${renderEstrellas(Number(op.calificacion))}
+                    <span class="opinion-rating-num">${op.calificacion}/5</span>
+                </div>
+                <p class="opinion-text">"${op.comentario}"</p>
+                ${op.created_at ? `
+                <p class="opinion-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    ${formatearFecha(op.created_at)}
+                </p>` : ''}
+            </div>
+        `).join('');
+
+    } catch (err) {
+        console.error('Error al cargar opiniones:', err);
+        grid.innerHTML = `
+            <p class="opiniones-empty">
+                <i class="fas fa-exclamation-circle" style="color:#e74c3c; margin-right: 8px;"></i>
+                No se pudieron cargar las opiniones. Intenta más tarde.
+            </p>`;
+    }
+}
 const commentForm = document.getElementById("comment-form");
 
 if (commentForm) {
@@ -152,7 +232,8 @@ if (commentForm) {
         btn.disabled = true;
 
         const comentario = document.getElementById("comentario").value;
-
+        const nombre = document.getElementById('opinion-nombre').value.trim();
+        const email = document.getElementById('opinion-email').value.trim();
         const ratingSelected = document.querySelector('input[name="rating"]:checked');
 
         if (!ratingSelected) {
@@ -174,7 +255,9 @@ if (commentForm) {
                 .insert([
                     {
                         comentario: comentario,
-                        calificacion: calificacion
+                        calificacion: calificacion,
+                        nombre: nombre,
+                        email: email
                     }
                 ]);
 
@@ -184,6 +267,8 @@ if (commentForm) {
             btn.style.backgroundColor = "#2ecc71";
 
             commentForm.reset();
+
+            await cargarComentarios();
 
         } catch (error) {
 
@@ -203,6 +288,13 @@ if (commentForm) {
     });
 
 }
+
+// Cargar comentarios al iniciar la página
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof supabaseClient !== 'undefined') {
+        cargarComentarios();
+    }
+});
 
 // Hover effects for service cards (optional subtle JS reinforcement)
 const serviceCards = document.querySelectorAll('.service-card');
