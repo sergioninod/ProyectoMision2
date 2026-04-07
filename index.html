@@ -33,6 +33,7 @@
                 <li><a href="#servicios">Servicios</a></li>
                 <li><a href="#testimonios">Testimonios</a></li>
                 <li><a href="#contacto">Contacto</a></li>
+                <li><a href="#comentarios">Deja tu opinión</a></li>
             </ul>
             <a href="#contacto" class="btn btn-primary"
                 style="padding: 10px 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px;">
@@ -248,7 +249,21 @@
 
                         <label>Calificación *</label>
 
-                        <div class="stars">
+                        <!-- Botón para activar cámara y UI de Teachable Machine -->
+                        <div id="tm-container" style="margin-top: 15px; margin-bottom: 15px; text-align: center;">
+                            <button type="button" id="start-camera-btn" class="btn"
+                                style="background-color: var(--secondary-color); color: #fff; margin-bottom: 10px; width: 100%;">
+                                <i class="fas fa-camera"></i> Calificar con Cámara (Gestos)
+                            </button>
+                            <p id="tm-status"
+                                style="font-size: 0.9em; color: var(--text-color); margin-bottom: 10px; display: none;">
+                                Iniciando cámara...</p>
+                            <div id="webcam-container"
+                                style="display: flex; justify-content: center; margin-bottom: 10px; border-radius: 8px; overflow: hidden;">
+                            </div>
+                        </div>
+
+                        <div class="stars" style="margin-top: 10px;">
 
                             <input type="radio" name="rating" id="star5" value="5">
                             <label for="star5"><i class="fas fa-star"></i></label>
@@ -293,6 +308,12 @@
                         <span>Cargando opiniones...</span>
                     </div>
                 </div>
+                <!-- Paginación -->
+                <div class="pagination-controls" id="pagination-controls" style="display: none; justify-content: center; align-items: center; gap: 15px; margin-top: 30px;">
+                    <button id="prev-page" class="btn" style="padding: 8px 16px; background-color: var(--glass); color: var(--text-primary); border: 1px solid var(--glass-border);"><i class="fas fa-chevron-left"></i> Anterior</button>
+                    <span id="page-info" style="color: var(--secondary-color); font-weight: 600;">1 / 1</span>
+                    <button id="next-page" class="btn" style="padding: 8px 16px; background-color: var(--glass); color: var(--text-primary); border: 1px solid var(--glass-border);">Siguiente <i class="fas fa-chevron-right"></i></button>
+                </div>
             </div>
         </div>
     </section>
@@ -318,6 +339,11 @@
     <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="supabase.js"></script>
+
+    <!-- TensorFlow y Teachable Machine -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
     <!-- Custom JS -->
     <script src="script.js"></script>

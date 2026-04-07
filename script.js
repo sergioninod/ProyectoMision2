@@ -165,6 +165,10 @@ function formatearFecha(isoString) {
 /**
  * Carga todas las opiniones de Supabase y las pinta en el grid.
  */
+let allOpinions = [];
+let currentPage = 1;
+const itemsPerPage = 4;
+
 async function cargarComentarios() {
     const grid = document.getElementById('opiniones-grid');
     if (!grid || typeof supabaseClient === 'undefined') return;
@@ -184,29 +188,9 @@ async function cargarComentarios() {
 
         if (error) throw error;
 
-        if (!data || data.length === 0) {
-            grid.innerHTML = `
-                <p class="opiniones-empty">
-                    <i class="fas fa-comment-slash" style="color: var(--secondary-color); margin-right: 8px;"></i>
-                    Aún no hay opiniones. ¡Sé el primero en compartir la tuya!
-                </p>`;
-            return;
-        }
-
-        grid.innerHTML = data.map((op, i) => `
-            <div class="opinion-card" style="animation-delay: ${i * 0.07}s">
-                <div class="opinion-stars">
-                    ${renderEstrellas(Number(op.calificacion))}
-                    <span class="opinion-rating-num">${op.calificacion}/5</span>
-                </div>
-                <p class="opinion-text">"${op.comentario}"</p>
-                ${op.created_at ? `
-                <p class="opinion-date">
-                    <i class="fas fa-calendar-alt"></i>
-                    ${formatearFecha(op.created_at)}
-                </p>` : ''}
-            </div>
-        `).join('');
+        allOpinions = data || [];
+        currentPage = 1;
+        renderPagination();
 
     } catch (err) {
         console.error('Error al cargar opiniones:', err);
@@ -215,6 +199,68 @@ async function cargarComentarios() {
                 <i class="fas fa-exclamation-circle" style="color:#e74c3c; margin-right: 8px;"></i>
                 No se pudieron cargar las opiniones. Intenta más tarde.
             </p>`;
+        const paginationControls = document.getElementById('pagination-controls');
+        if(paginationControls) paginationControls.style.display = 'none';
+    }
+}
+
+function renderPagination() {
+    const grid = document.getElementById('opiniones-grid');
+    const paginationControls = document.getElementById('pagination-controls');
+    
+    if (allOpinions.length === 0) {
+        grid.innerHTML = `
+            <p class="opiniones-empty">
+                <i class="fas fa-comment-slash" style="color: var(--secondary-color); margin-right: 8px;"></i>
+                Aún no hay opiniones. ¡Sé el primero en compartir la tuya!
+            </p>`;
+        if(paginationControls) paginationControls.style.display = 'none';
+        return;
+    }
+
+    const totalPages = Math.ceil(allOpinions.length / itemsPerPage);
+    if(currentPage < 1) currentPage = 1;
+    if(currentPage > totalPages) currentPage = totalPages;
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedItems = allOpinions.slice(startIndex, endIndex);
+
+    grid.innerHTML = paginatedItems.map((op, i) => `
+        <div class="opinion-card" style="animation-delay: ${i * 0.07}s">
+            <div class="opinion-stars">
+                ${renderEstrellas(Number(op.calificacion))}
+                <span class="opinion-rating-num">${op.calificacion}/5</span>
+            </div>
+            <p class="opinion-text">"${op.comentario}"</p>
+            ${op.created_at ? `
+            <p class="opinion-date">
+                <i class="fas fa-calendar-alt"></i>
+                ${formatearFecha(op.created_at)}
+            </p>` : ''}
+        </div>
+    `).join('');
+
+    if (paginationControls) {
+        if (totalPages > 1) {
+            paginationControls.style.display = 'flex';
+            document.getElementById('page-info').innerText = `${currentPage} / ${totalPages}`;
+            
+            const btnPrev = document.getElementById('prev-page');
+            const btnNext = document.getElementById('next-page');
+            
+            if (btnPrev && btnNext) {
+                btnPrev.disabled = currentPage === 1;
+                btnNext.disabled = currentPage === totalPages;
+                
+                btnPrev.style.opacity = btnPrev.disabled ? '0.5' : '1';
+                btnNext.style.opacity = btnNext.disabled ? '0.5' : '1';
+                btnPrev.style.cursor = btnPrev.disabled ? 'not-allowed' : 'pointer';
+                btnNext.style.cursor = btnNext.disabled ? 'not-allowed' : 'pointer';
+            }
+        } else {
+            paginationControls.style.display = 'none';
+        }
     }
 }
 const commentForm = document.getElementById("comment-form");
@@ -289,10 +335,31 @@ if (commentForm) {
 
 }
 
-// Cargar comentarios al iniciar la página
+// Cargar comentarios y escuchar botones de paginación al iniciar la página
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof supabaseClient !== 'undefined') {
         cargarComentarios();
+    }
+    
+    // Listeners paginación
+    const btnPrev = document.getElementById('prev-page');
+    const btnNext = document.getElementById('next-page');
+    if (btnPrev) {
+        btnPrev.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPagination();
+            }
+        });
+    }
+    if (btnNext) {
+        btnNext.addEventListener('click', () => {
+            const totalPages = Math.ceil(allOpinions.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPagination();
+            }
+        });
     }
 });
 
@@ -306,3 +373,164 @@ serviceCards.forEach(card => {
         card.style.borderColor = 'var(--glass-border)';
     });
 });
+
+/* === INTEGRACIÓN TEACHABLE MACHINE (👍 / 👎) === */
+const tmURL = "https://teachablemachine.withgoogle.com/models/kp0cBYs9C/";
+let tmModel, webcam, maxPredictions;
+let isCameraActive = false;
+let tmInterval;
+let lastDetectedValue = null;
+
+const startCameraBtn = document.getElementById("start-camera-btn");
+const tmStatus = document.getElementById("tm-status");
+const webcamContainer = document.getElementById("webcam-container");
+
+if (startCameraBtn) {
+    startCameraBtn.addEventListener("click", initTM);
+}
+
+// Opcional: Escuchar eventos de finalización de llamada en VAPI para invitar a calificar
+window.addEventListener('vapi-call-end', () => {
+    // Si queremos Auto-start, llamar a initTM(). 
+    // Por el momento, el fallback de "Cámara activa" depende del click del usuario.
+    if(startCameraBtn) {
+        startCameraBtn.classList.add('pulse'); // Añadir alguna animación sugerida
+    }
+});
+
+async function initTM() {
+    if (isCameraActive) return;
+    
+    startCameraBtn.style.display = "none";
+    tmStatus.style.display = "block";
+    tmStatus.innerText = "Solicitando permisos de cámara y cargando modelo...";
+
+    try {
+        const modelURL = tmURL + "model.json";
+        const metadataURL = tmURL + "metadata.json";
+
+        tmModel = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = tmModel.getTotalClasses();
+
+        // Configuración de la cámara
+        const flip = true; 
+        webcam = new tmImage.Webcam(250, 250, flip); 
+        
+        await webcam.setup(); // Solicitar acceso a la cámara
+        await webcam.play();
+        window.requestAnimationFrame(loopTM);
+        
+        isCameraActive = true;
+        webcamContainer.innerHTML = "";
+        webcamContainer.appendChild(webcam.canvas);
+        
+        let timeLeft = 5;
+        tmStatus.innerHTML = `<strong>Cámara Activa:</strong> Evaluando en <span id="tm-timer">${timeLeft}</span>s. <br><span id="tm-live-feedback">Haz un gesto 👍 o 👎.</span>`;
+        tmStatus.style.color = "var(--secondary-color)";
+
+        tmInterval = setInterval(() => {
+            if (!isCameraActive) {
+                clearInterval(tmInterval);
+                return;
+            }
+            timeLeft--;
+            const timerSpan = document.getElementById("tm-timer");
+            if (timerSpan) timerSpan.innerText = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(tmInterval);
+                confirmarCalificacionTM();
+            }
+        }, 1000);
+
+    } catch (error) {
+        console.error("Error al iniciar Teachable Machine:", error);
+        tmStatus.innerText = "Error accediendo a la cámara. Por favor, usa la calificación manual (botones).";
+        tmStatus.style.color = "#e74c3c";
+        startCameraBtn.style.display = "block";
+    }
+}
+
+async function loopTM() {
+    if (!isCameraActive) return;
+    webcam.update(); 
+    await predictTM();
+    if(isCameraActive) {
+        window.requestAnimationFrame(loopTM);
+    }
+}
+
+async function predictTM() {
+    if (!isCameraActive) return;
+    
+    const prediction = await tmModel.predict(webcam.canvas);
+    
+    // Umbral de confianza
+    const umbral = 0.85;
+    lastDetectedValue = null;
+    const liveFeedback = document.getElementById("tm-live-feedback");
+
+    for (let i = 0; i < maxPredictions; i++) {
+        if (prediction[i].probability > umbral) {
+            let className = prediction[i].className.toLowerCase();
+            
+            // Evaluamos si el nombre de la clase está típicamente relacionado al lado positivo (1) o negativo (2)
+            // Se asume el índice 0 o palabras como "bien", "arriba", etc., como Positivo
+            if (className.includes("1") || className.includes("bien") || className.includes("arriba") || className.includes("👍") || className.includes("positivo") || i === 0) {
+                lastDetectedValue = { valor: 5, mensaje: "¡Gesto Positivo Detectado! Calificación asignada: 5 estrellas." };
+                if (liveFeedback) {
+                    liveFeedback.innerHTML = "<strong>👍 Detectando Positivo... ¡Mantenlo!</strong>";
+                    liveFeedback.style.color = "#2ecc71";
+                }
+                return;
+            } else if (className.includes("2") || className.includes("mal") || className.includes("abajo") || className.includes("👎") || className.includes("negativo") || i === 1) {
+                lastDetectedValue = { valor: 1, mensaje: "¡Gesto Negativo Detectado! Calificación asignada: 1 estrella." };
+                if (liveFeedback) {
+                    liveFeedback.innerHTML = "<strong>👎 Detectando Negativo... ¡Mantenlo!</strong>";
+                    liveFeedback.style.color = "#e74c3c";
+                }
+                return;
+            }
+        }
+    }
+    
+    if (liveFeedback) {
+        liveFeedback.innerHTML = "Haz un gesto 👍 o 👎.";
+        liveFeedback.style.color = "inherit";
+    }
+}
+
+function confirmarCalificacionTM() {
+    if (lastDetectedValue) {
+        seleccionarEstrellas(lastDetectedValue.valor);
+        detenerTM(lastDetectedValue.mensaje, true);
+    } else {
+        detenerTM("Tiempo agotado. No se detectó un gesto claro. Puedes intentarlo de nuevo.", false);
+    }
+}
+
+function seleccionarEstrellas(valor) {
+    const star = document.getElementById("star" + valor);
+    if (star) {
+        star.checked = true;
+        
+        // Destacar visualmente la selección si se desea
+        star.parentElement.style.animation = "pulse 0.5s ease-in-out";
+    }
+}
+
+function detenerTM(mensaje, exito = true) {
+    isCameraActive = false;
+    if (webcam) {
+        webcam.stop();
+    }
+    webcamContainer.innerHTML = "";
+    clearInterval(tmInterval);
+    
+    tmStatus.innerHTML = `<strong>${mensaje}</strong><br>Cámara detenida.${exito ? ' Puedes enviar tu comentario ahora.' : ''}`;
+    tmStatus.style.color = exito ? "#2ecc71" : "#e74c3c"; // Verde éxito o rojo error
+    
+    // Mostramos botón por si quiere re-evaluar manual o volver a intentar
+    startCameraBtn.style.display = "inline-block";
+    startCameraBtn.innerHTML = '<i class="fas fa-redo"></i> ' + (exito ? 'Volver a Calificar con Cámara' : 'Reintentar con Cámara');
+}

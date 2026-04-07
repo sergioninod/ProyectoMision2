@@ -658,8 +658,9 @@ footer {
 
 /* Grid de cards */
 .opiniones-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 24px;
 }
 
@@ -688,6 +689,8 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1 1 270px;
+  max-width: 350px;
 }
 
 .opinion-card:hover {
@@ -786,4 +789,14 @@ footer {
   .comment-box {
     padding: 28px 20px;
   }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); text-shadow: 0 0 10px var(--secondary-color); color: var(--secondary-color); }
+  100% { transform: scale(1); }
+}
+
+.pulse {
+  animation: pulse 1s infinite alternate;
 }
